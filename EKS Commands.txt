@@ -1,0 +1,62 @@
+
+
+
+EKS Basics
+
+--Create IAM Roles
+IAM Role -- Create -- Service=EKS -- Case=EKS-Cluster -- AmazonEKSClusterPolicy -- Name=AmazonEKSClusterPolicy --Done
+
+IAM Role -- Create -- Service=EC2 -- Case=EC2 -- {ECR ReadOnly, EC2ContainerReadOnly, EKS_CNI, EKSWorkerNode} 
+
+
+--Installing eksctl on AmzLinux2023
+curl --silent --location "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+eksctl version
+
+
+--Installing kubectl on AmzLinux2023
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+kubectl version --client
+
+
+
+
+
+sudo yum install -y docker
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+
+
+sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d '"' -f 4)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+
+
+docker build -t student-management-app .
+docker-compose up --build
+
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 992382543428.dkr.ecr.us-east-1.amazonaws.com
+
+aws ecr create-repository --repository-name php-app --region us-east-1
+aws ecr create-repository --repository-name mysql-db --region us-east-1
+
+
+docker tag student-app-php:latest 992382543428.dkr.ecr.us-east-1.amazonaws.com/php-app:latest
+docker tag student-app-db:latest 992382543428.dkr.ecr.us-east-1.amazonaws.com/mysql-db:latest
+
+
+docker push 992382543428.dkr.ecr.us-east-1.amazonaws.com/php-app:latest
+docker push 992382543428.dkr.ecr.us-east-1.amazonaws.com/mysql-db:latest
+
+
+
+kubectl create namespace php-mysql-app
+kubectl apply -f mysql-deployment-and-service.yaml
+kubectl apply -f php-deployment-and-service.yaml
+
+kubectl get pods -n php-mysql-app
+kubectl get services -n php-mysql-app

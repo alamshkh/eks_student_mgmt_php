@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  db:
+    build: ./mysql
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: studentdb
+    ports:
+      - "3306:3306"
+
+  php:
+    build: .
+    container_name: php-app
+    volumes:
+      - ./app:/var/www/html/
+    ports:
+      - "8080:80"
+    depends_on:
+      - db

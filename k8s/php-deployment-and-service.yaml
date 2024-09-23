@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-app
+  namespace: php-mysql-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: php-app
+  template:
+    metadata:
+      labels:
+        app: php-app
+    spec:
+      containers:
+      - name: php-app
+        image: 992382543428.dkr.ecr.us-east-1.amazonaws.com/php-app  # Use your PHP app image from ECR
+        ports:
+        - containerPort: 80
+        env:
+        - name: DB_HOST
+          value: "mysql"  # MySQL service name
+        - name: DB_USER
+          value: "root"  # Use root user to match db.php
+        - name: DB_PASSWORD
+          value: "password"  # Must match the MYSQL_ROOT_PASSWORD
+        - name: DB_NAME
+          value: "studentdb"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-service
+  namespace: php-mysql-app
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: php-app
