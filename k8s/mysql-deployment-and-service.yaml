@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: 992382543428.dkr.ecr.us-east-1.amazonaws.com/mysql-db  # Use your custom MySQL image from ECR
+        image: 897722701420.dkr.ecr.us-east-1.amazonaws.com/mysql-db:latest # Use your custom MySQL image from ECR
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: "password"  # Make sure this matches what you used in your Dockerfile
